@@ -27,8 +27,12 @@ class TreeNode:
             childPath = self.childNodes[splitValue]
         else:
             if splitValue >= self.partitionValue:
+                if "greater" not in self.childNodes.keys():
+                    return self.getMajorityLabel()
                 childPath = self.childNodes["greater"]
             else:
+                if "less" not in self.childNodes.keys():
+                    return self.getMajorityLabel()
                 childPath = self.childNodes["less"]
 
         return childPath.predict(testInstance)

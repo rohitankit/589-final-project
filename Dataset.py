@@ -9,11 +9,15 @@ class Dataset:
     def __init__(self):
         self.featureLen = 0
         self.datasetInstances = []
-        self.datasetLabels = []
 
         self._datasetClassPartition = []
     
     def load(self, dataInstances):
+        """
+        loads dataInstances to Dataset object
+
+        returns: None
+        """
         self.datasetInstances = dataInstances
         self.featureLen = len(dataInstances[0])-1
         
@@ -24,7 +28,7 @@ class Dataset:
         for classInstances in classInstancesDict.values():
             self._datasetClassPartition.append(classInstances)
     
-    def _parse(self):
+    def loadFromFile(self, file, delimiter, classIdx, ignoreAttributes):
         """
         Parses dataFile and seperates instances into training and testing set
 
@@ -32,27 +36,38 @@ class Dataset:
         """
         classInstancesDict = defaultdict(lambda :[])
 
-        if self.dataFile:
-            with open(self.dataFile, "r") as f:
-                reader = csv.reader(f, delimiter=self.delimiter)
+        if file:
+            with open(file, "r") as f:
+                reader = csv.reader(f, delimiter=delimiter)
 
                 for i, line in enumerate(reader):
                     if i == 0:
                         continue
                     if len(line) > 0:
                         parsedInstance = []
-                        for feature in line:
-                            parsedInstance.append(float(feature))
-                        self._dataset.append(parsedInstance)
+                        for idx, feature in enumerate(line):
+                            if idx not in ignoreAttributes:
+                                if not Dataset.is_float(feature):
+                                    ascii_sum = 0
+                                    for char in feature:
+                                        ascii_sum += ord(char)
+                                    parsedInstance.append(ascii_sum) 
+                                else:   
+                                    parsedInstance.append(float(feature))
+                        self.datasetInstances.append(parsedInstance)
                         
-                        instanceClass = parsedInstance[self.classIdx]
+                        instanceClass = parsedInstance[classIdx]
                         classInstancesDict[instanceClass].append(parsedInstance)
         
         for classInstances in classInstancesDict.values():
             self._datasetClassPartition.append(classInstances)
-
-    def getDataset(self):
-        return self._dataset
+    
+    def is_float(string):
+        try:
+            float(string)
+            return True
+        except ValueError:
+            return False
 
     def getKFoldPartitions(self, k):
         """
@@ -74,6 +89,9 @@ class Dataset:
             random.shuffle(kFoldDataset[i])
         
         return kFoldDataset
+
+    def getRawDataset(self):
+        return self.datasetInstances
     
     def _partition(lst, k): 
         division = len(lst) / float(k) 

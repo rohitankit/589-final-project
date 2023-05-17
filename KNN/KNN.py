@@ -30,7 +30,7 @@ class KNN():
         self.trainingData = trainingData
         self.testData = testData
     
-    def predict(self, testInstance):
+    def predict(self, testInstance, classIdx):
         """
         predicts the label of a test Instance of features by averaging k Nearest Neighbors in space
 
@@ -42,8 +42,14 @@ class KNN():
 
         for idx in range(len(self.trainingData)):
             trainingInstance = self.trainingData[idx]
-            instanceDifference = KNN.getEuclidianDist(trainingInstance[:-1], testInstance[:-1])
-            sortedInstances.append((instanceDifference, trainingInstance[-1]))
+            trainingAttributes = [trainingInstance[:classIdx], trainingInstance[classIdx+1:]]
+            trainingAttributes = [instance for fold in trainingAttributes for instance in fold]
+
+            testAttributes = [testInstance[:classIdx], testInstance[classIdx+1:]]
+            testAttributes = [instance for fold in testAttributes for instance in fold]
+
+            instanceDifference = KNN.getEuclidianDist(trainingAttributes, testAttributes)
+            sortedInstances.append((instanceDifference, trainingInstance[classIdx]))
 
         sortedInstances.sort(key = lambda x:x[0])
 
@@ -102,14 +108,14 @@ class KNN():
         print(a, b)
         return (correctPredictions/len(self.trainingData))
 
-    def evaluate(self, datasetLabels):
+    def evaluate(self, datasetLabels, classIdx):
         modelEvaluator = ModelEvaluation()
         modelEvaluator.setLabels(datasetLabels)
 
         for testInstance in self.testData:
-            predictedClass = self.predict(testInstance)
-            actualClass = testInstance[-1]
+            predictedClass = self.predict(testInstance, classIdx)
+            actualClass = testInstance[classIdx]
 
             modelEvaluator.addInstanceEvaluation(int(actualClass), int(predictedClass))
-        
+
         return modelEvaluator.getAccuracy(), modelEvaluator.getF1Score()

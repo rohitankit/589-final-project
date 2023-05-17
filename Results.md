@@ -1,0 +1,57 @@
+# Algorithms, and datasets
+
+- KNN
+  - Handwritten Digits:
+    - Accuracy: 0.9872
+    - F1-Score: 0.9872
+  - Titanic accuracy:
+    - Accuracy: 0.7782
+    - F1-Score: 0.7636
+  - Loan Eligibility accuracy:
+    - Accuracy:
+    - F1-Score:
+  - Parkinsons accuracy:
+    - Accuracy:
+    - F1-Score:
+
+- Decision Trees:
+  - Handwritten Digits:
+    - Accuracy:
+    - F1-Score:
+  - Titanic accuracy:
+    - Accuracy:
+    - F1-Score:
+  - Loan Eligibility accuracy:
+    - Accuracy:
+    - F1-Score:
+  - Parkinsons accuracy:
+    - Accuracy:
+    - F1-Score:
+
+- Random Forest:
+  - Handwritten Digits:
+    - Accuracy: 0.9660
+    - F1-Score: 0.9657
+  - Titanic accuracy:
+    - Accuracy: 0.9633
+    - F1-Score: 0.9631
+  - Loan Eligibility accuracy:
+    - Accuracy:
+    - F1-Score:
+  - Parkinsons accuracy:
+    - Accuracy:
+    - F1-Score:
+
+- Neural Network:
+  - Handwritten Digits:
+    - Accuracy:
+    - F1-Score:
+  - Titanic accuracy:
+    - Accuracy:
+    - F1-Score:
+  - Loan Eligibility accuracy:
+    - Accuracy:
+    - F1-Score:
+  - Parkinsons accuracy:
+    - Accuracy:
+    - F1-Score:

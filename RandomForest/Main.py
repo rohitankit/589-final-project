@@ -15,11 +15,11 @@ class EnsembleEvaluation:
         self.attributeTypes = []
         self.kFoldDataset = []
     
-    def initDataset(self, dataset, kFoldDataset, attributeTypes):
+    def initDataset(self, dataset, kFoldDataset, attributeTypes, datasetLabelIdx):
         self.dataset = dataset
         self.kFoldDataset = kFoldDataset
 
-        self.datasetLabelIdx = len(self.dataset[0])-1
+        self.datasetLabelIdx = datasetLabelIdx
         self.attributeTypes = attributeTypes
 
     def getLabels(self):
@@ -49,8 +49,10 @@ class EnsembleEvaluation:
 
             for testInstance in testData:
                 predictedLabel = self.randomForest.predict(testInstance)
-                actualLabel = testInstance[-1]
+                actualLabel = testInstance[self.datasetLabelIdx]
                 modelEvaluator.addInstanceEvaluation(int(actualLabel), int(predictedLabel))
+            
+            # modelEvaluator.getConfusionMatrix()
             
             accuracyValues.append(modelEvaluator.getAccuracy())
             F1_Values.append(modelEvaluator.getF1Score())
