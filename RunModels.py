@@ -43,11 +43,47 @@ class RunModels:
         titanicAttributeTypes = [True, True, True, False, False, False, False]
 
         datasetLabels = [0, 1]
-        print("\n")
-        self.getRandomForestTable(dataset, titanicAttributeTypes)
-        print("\n")
-        self.getKnnTable(datasetLabels)
+        # print("\n")
+        # self.getRandomForestTable(dataset, titanicAttributeTypes)
+        # print("\n")
+        # self.getKnnTable(datasetLabels)
 
+        # self.getKnnGraph(datasetLabels)
+        # self.getRandomForestGraph(dataset, titanicAttributeTypes)
+    
+    def runLoanModels(self):
+        loanData = LoadDataset()
+        ignoreAttributes = [0]
+        dataset, self.kFoldPartitions = loanData.loadLoanDataset(ignoreAttributes)
+
+        self.classIdx = len(dataset[0])-1
+        loanAttributeTypes = [True, True, True, True, True, False, False, False, False, True, True, True]
+
+        datasetLabels = [0, 1]
+        # print("\n")
+        # self.getRandomForestTable(dataset, loanAttributeTypes)
+        # print("\n")
+        # self.getKnnTable(datasetLabels)
+
+        self.getKnnGraph(datasetLabels)
+        self.getRandomForestGraph(dataset, loanAttributeTypes)
+    
+    def runParkinsonsModels(self):
+        loanData = LoadDataset()
+        ignoreAttributes = []
+        dataset, self.kFoldPartitions = loanData.loadParkinsonsDataset(ignoreAttributes)
+
+        self.classIdx = len(dataset[0])-1
+        loanAttributeTypes = [False] * 22 + [True]
+
+        datasetLabels = [0, 1]
+        # print("\n")
+        # self.getRandomForestTable(dataset, loanAttributeTypes)
+        # print("\n")
+        # self.getKnnTable(datasetLabels)
+
+        self.getKnnGraph(datasetLabels)
+        self.getRandomForestGraph(dataset, loanAttributeTypes)
 
 
     def getKnnGraph(self, datasetLabels):
@@ -85,14 +121,14 @@ class RunModels:
         KNN_Graph.plot(KNN_hyperparameters, KNN_K_F1Score, "F1 Scores")
         KNN_Graph.show()
 
-    def getRandomForestGraph(self, dataset, digitsAttributeTypes):
+    def getRandomForestGraph(self, dataset, AttributeTypes):
         randomForestHyperParameters = [5, 10, 15, 20, 25, 30]
         randomForestAccuracies = []
         randomForestF1Scores = []
 
         for k in randomForestHyperParameters:
             randomForestModel = EnsembleEvaluation(k)
-            randomForestModel.initDataset(dataset, self.kFoldPartitions, digitsAttributeTypes, self.classIdx)
+            randomForestModel.initDataset(dataset, self.kFoldPartitions, AttributeTypes, self.classIdx)
             randomForestAccuracy, randomForestF1 = randomForestModel.evaluate()
             randomForestAccuracies.append(randomForestAccuracy)
             randomForestF1Scores.append(randomForestF1)
@@ -111,7 +147,7 @@ class RunModels:
     def getRandomForestTable(self, dataset, digitsAttributeTypes):
         randomForestHyperParameters = [5, 10, 15, 20]
 
-        print("Dataset 2 metric evaluation using random forests\n")
+        print("Dataset 4 metric evaluation using random forests\n")
         print("  k-value  |  Accuracy  | F1 Score ")
         print("------------------------------------")
 
@@ -127,7 +163,7 @@ class RunModels:
         KNN_Accuracies = []
         KNN_F1_Scores = []
 
-        print("Dataset 2 metric evaluation using KNN\n")
+        print("Dataset 4 metric evaluation using KNN\n")
         print("  k-value  |  Accuracy  | F1 Score ")
         print("------------------------------------")
 
@@ -201,4 +237,4 @@ class RunModels:
         
 
 digitsModel = RunModels()
-digitsModel.runTitanicModels()
+digitsModel.runLoanModels()

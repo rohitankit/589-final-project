@@ -8,11 +8,11 @@
     - Accuracy: 0.7782
     - F1-Score: 0.7636
   - Loan Eligibility accuracy:
-    - Accuracy:
-    - F1-Score:
+    - Accuracy: 0.7958
+    - F1-Score: 0.7175
   - Parkinsons accuracy:
-    - Accuracy:
-    - F1-Score:
+    - Accuracy: 0.9495
+    - F1-Score: 0.9330
 
 - Decision Trees:
   - Handwritten Digits:
@@ -36,11 +36,11 @@
     - Accuracy: 0.9633
     - F1-Score: 0.9631
   - Loan Eligibility accuracy:
-    - Accuracy:
-    - F1-Score:
+    - Accuracy: 0.8063
+    - F1-Score: 0.7242
   - Parkinsons accuracy:
-    - Accuracy:
-    - F1-Score:
+    - Accuracy: 0.9134
+    - F1-Score: 0.8710
 
 - Neural Network:
   - Handwritten Digits:

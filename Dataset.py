@@ -89,6 +89,26 @@ class Dataset:
             random.shuffle(kFoldDataset[i])
         
         return kFoldDataset
+    
+    def oneHotEncodeLabel(self, datasetLabels, classIdx):
+
+        self._datasetClassPartition = []
+        newDatasetInstances = []
+
+        classInstancesDict = defaultdict(lambda : [])
+
+        for instance in self.datasetInstances:
+            classValue = instance[classIdx]
+            encodedInstance = instance[:classIdx] + [datasetLabels.index(classValue)] + instance[classIdx+1:]
+            newDatasetInstances.append(encodedInstance)
+
+            instanceClass = encodedInstance[classIdx]
+            classInstancesDict[instanceClass].append(encodedInstance)
+            
+        for classInstances in classInstancesDict.values():
+            self._datasetClassPartition.append(classInstances)
+        
+        self.datasetInstances = newDatasetInstances
 
     def getRawDataset(self):
         return self.datasetInstances

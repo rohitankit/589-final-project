@@ -26,3 +26,22 @@ class LoadDataset:
         dataset = titanicDatasetObj.getRawDataset()
 
         return dataset, titanicDatasetObj.getKFoldPartitions(10)
+
+    def loadLoanDataset(self, ignoreAttributes):
+        titanicDatasetObj = Dataset()
+        titanicDatasetObj.loadFromFile('./assets/loan.csv', ',', 11, ignoreAttributes)
+        
+        datasetLabels = [78, 89]
+        titanicDatasetObj.oneHotEncodeLabel(datasetLabels, 11)
+
+        dataset = titanicDatasetObj.getRawDataset()
+        return dataset, titanicDatasetObj.getKFoldPartitions(10)
+
+    def loadParkinsonsDataset(self, ignoreAttributes):
+        parkinsonsDatasetObj = Dataset()
+        parkinsonsDatasetObj.loadFromFile('./assets/parkinsons.csv', ',', 22, ignoreAttributes)
+
+        datasetLabels = [0, 1]
+
+        dataset = parkinsonsDatasetObj.getRawDataset()
+        return dataset, parkinsonsDatasetObj.getKFoldPartitions(10)
