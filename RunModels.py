@@ -33,6 +33,8 @@ class RunModels:
         # self.getNNTable(datasetLabels)
         # self.getRandomForestTable(dataset, digitsAttributeTypes)
         # self.getKnnTable(datasetLabels)
+        
+        self.getNNGraph(datasetLabels)
 
         # self.getKnnGraph(datasetLabels)
         # self.getRandomForestGraph(dataset, digitsAttributeTypes)
@@ -104,8 +106,8 @@ class RunModels:
         
         self.getNNTable(datasetLabels)
 
-        self.getKnnGraph(datasetLabels)
-        self.getRandomForestGraph(dataset, loanAttributeTypes)
+        # self.getKnnGraph(datasetLabels)
+        # self.getRandomForestGraph(dataset, loanAttributeTypes)
 
     def getNNGraph(self, datasetLabels):
         NN_hyperparameters = [
@@ -122,43 +124,90 @@ class RunModels:
         NN_K_F1Score = []
 
         # for param in NN_hyperparameters:
-        for epochs in NN_hyperparameters:
-            NN_CrossValidation_Accuracies = []
-            NN_CrossValidation_F1_Scores = []
-            for testIdx in range(10):
-                trainingData = (
-                    self.kFoldPartitions[:testIdx] + self.kFoldPartitions[testIdx + 1 :]
-                )
-                trainingData = [instance for fold in trainingData for instance in fold]
+        
+        epoch_vals = [x for x in range(0, 1000, 100)]
+        
+        training_datas = [
+            self.kFoldPartitions[:test_idx] + self.kFoldPartitions[test_idx + 1 :]
+            for test_idx in range(10)
+        ]
+        
+        training_datas = [
+            [instance
+            for fold in training_data
+            for instance in fold]
+            for training_data in training_datas
+        ]
+        
+        test_datas = [
+            self.kFoldPartitions[test_idx]
+            for test_idx in range(10)
+        ]
+        
+        
+        feature_boundes = [self.getBounds(training_data, test_data) for training_data, test_data in zip(training_datas, test_datas)]
+        normalized_training_datas = [self._normalize(training_data, feature_bounds) for training_data, feature_bounds in zip(training_datas, feature_boundes)]
+        normalized_test_data = [self._normalize(test_data, feature_bounds) for test_data, feature_bounds in zip(test_datas, feature_boundes)]
 
-                testData = self.kFoldPartitions[testIdx]
+        neural_networks = [
+            NeuralNetwork(training_data=train_data, test_data=test_data, epochs=0)
+            for train_data, test_data in zip(normalized_training_datas, normalized_test_data)
+            ]
+        
+        epoch_accuracies = []
+        epoch_f1_scores = []
+        last_epochs = 0
+        
+        for epochs in epoch_vals:
+            
+            for neural_network in neural_networks:
+                neural_network.train(epochs=epochs - last_epochs)
+            
+            evals = [neural_network.evaluate(None, None) for neural_network in neural_networks]
+            epoch_accuracies.append(mean([eval_[0] for eval_ in evals]))
+            epoch_f1_scores.append(mean([eval_[1] for eval_ in evals]))
+                
+            last_epochs = epochs
+        
+        # for epochs in NN_hyperparameters:
+        #     NN_CrossValidation_Accuracies = []
+        #     NN_CrossValidation_F1_Scores = []
+        #     for testIdx in range(10):
+        #         trainingData = (
+        #             self.kFoldPartitions[:testIdx] + self.kFoldPartitions[testIdx + 1 :]
+        #         )
+        #         trainingData = [instance for fold in trainingData for instance in fold]
 
-                featureBounds = self.getBounds(trainingData, testData)
-                normalizedTrainingData = self._normalize(trainingData, featureBounds)
-                normalizedTestData = self._normalize(testData, featureBounds)
+        #         testData = self.kFoldPartitions[testIdx]
 
-                NN_Accuracy, NN_F1_Score = self.evaluateNN(
-                    normalizedTrainingData,
-                    normalizedTestData,
-                    datasetLabels,
-                    self.classIdx,
-                    **dict(epochs=epochs),
-                )
-                NN_CrossValidation_Accuracies.append(NN_Accuracy)
-                NN_CrossValidation_F1_Scores.append(NN_F1_Score)
+        #         featureBounds = self.getBounds(trainingData, testData)
+        #         normalizedTrainingData = self._normalize(trainingData, featureBounds)
+        #         normalizedTestData = self._normalize(testData, featureBounds)
 
-            NN_K_Accuracies.append(mean(NN_CrossValidation_Accuracies))
-            NN_K_F1Score.append(mean(NN_CrossValidation_F1_Scores))
+        #         NN_Accuracy, NN_F1_Score = self.evaluateNN(
+        #             normalizedTrainingData,
+        #             normalizedTestData,
+        #             datasetLabels,
+        #             self.classIdx,
+        #             **dict(epochs=epochs),
+        #         )
+        #         NN_CrossValidation_Accuracies.append(NN_Accuracy)
+        #         NN_CrossValidation_F1_Scores.append(NN_F1_Score)
 
-        print(NN_K_Accuracies)
-        print(NN_K_F1Score)
+        #     NN_K_Accuracies.append(mean(NN_CrossValidation_Accuracies))
+        #     NN_K_F1Score.append(mean(NN_CrossValidation_F1_Scores))
+
+        print(epoch_accuracies)
+        print(epoch_f1_scores)
         NN_Graph = Graph()
         NN_Graph.setTitle("Neural Net - Accuracy and F1 scores vs Epochs")
         NN_Graph.setXLabel("K values")
         NN_Graph.setYLabel("Accuracy and F1 scores")
-        NN_Graph.plot(NN_hyperparameters, NN_K_Accuracies, "Accuracy Scores")
-        NN_Graph.plot(NN_hyperparameters, NN_K_F1Score, "F1 Scores")
+        NN_Graph.plot(epoch_vals, epoch_accuracies, "Accuracy Scores")
+        NN_Graph.plot(epoch_vals, epoch_f1_scores, "F1 Scores")
         NN_Graph.show()
+        
+        pass
 
     def getKnnGraph(self, datasetLabels):
         KNN_hyperparameters = [1, 3, 5, 7, 9, 11, 13, 15]
@@ -250,7 +299,7 @@ class RunModels:
             )
             
     def getNNTable(self, datasetLabels):
-        NN_hidden_layer_sizeses = [[16]]#[[8], [16], [8, 4], [4]]
+        NN_hidden_layer_sizeses = [[8, 4]]#[[8], [16], [8, 4], [4]]
         NN_Accuracies = []
         NN_F1_Scores = []
 
@@ -400,7 +449,7 @@ class RunModels:
 
 digitsModel = RunModels()
 # digitsModel.runLoanModels()
-# digitsModel.runDigitsModels()
+digitsModel.runDigitsModels()
 # digitsModel.runTitanicModels()
-digitsModel.runLoanModels()
+# digitsModel.runLoanModels()
 # digitsModel.runParkinsonsModels()

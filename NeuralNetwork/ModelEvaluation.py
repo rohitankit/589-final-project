@@ -69,7 +69,10 @@ class ModelEvaluation:
                         predictedClassIdx
                     ]
 
-            labelRecalls.append(truePositives / (truePositives + falseNegatives))
+            if truePositives + falseNegatives == 0:
+                labelRecalls.append(0)
+            else:
+                labelRecalls.append(truePositives / (truePositives + falseNegatives))
 
         return labelRecalls
 

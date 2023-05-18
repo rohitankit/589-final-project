@@ -15,7 +15,7 @@ class NeuralNetwork:
         class_index: int = -1,
         hidden_layer_sizes: Optional[List[int]] = None,
         batch_size: int = 32,
-        epochs: int = 500,
+        epochs: int = int(2.5e3),
         learning_rate: float = 1.0,
         **kwargs
     ):
@@ -37,17 +37,36 @@ class NeuralNetwork:
                 self.vectorized_training_data.labels.shape[-1],
             ]
         )
+        
+        self.learning_rate = learning_rate
+        self.console_log = False
+        self.show_progress_bar = False
+        self.batch_size = batch_size
 
         self.net.train(
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             epochs=epochs,
             train_x=self.vectorized_training_data.attributes,
             train_y=self.vectorized_training_data.labels,
             eval_x=self.vectorized_test_data.attributes,
             eval_y=self.vectorized_test_data.labels,
-            learning_rate=learning_rate,
-            console_log=False,
-            show_progress_bar=False,
+            learning_rate=self.learning_rate,
+            console_log=self.console_log,
+            show_progress_bar=self.show_progress_bar,
+            **kwargs,
+        )
+        
+    def train(self, epochs, **kwargs):
+        self.net.train(
+            batch_size=self.batch_size,
+            epochs=epochs,
+            train_x=self.vectorized_training_data.attributes,
+            train_y=self.vectorized_training_data.labels,
+            eval_x=self.vectorized_test_data.attributes,
+            eval_y=self.vectorized_test_data.labels,
+            learning_rate=self.learning_rate,
+            console_log=self.console_log,
+            show_progress_bar=self.show_progress_bar,
             **kwargs,
         )
         
@@ -61,12 +80,16 @@ class NeuralNetwork:
         
 
     def evaluate(self, datasetLabels, classIdx):
+        
+        if datasetLabels == None:
+            datasetLabels = [x[self.class_index] for x in self.test_data]
+        
         modelEvaluator = ModelEvaluation()
         modelEvaluator.setLabels(datasetLabels)
 
         for testInstance in self.test_data:
-            predictedClass = self.predict(testInstance, classIdx)
-            actualClass = testInstance[classIdx]
+            predictedClass = self.predict(testInstance, self.class_index)
+            actualClass = testInstance[self.class_index]
 
             modelEvaluator.addInstanceEvaluation(int(actualClass), int(predictedClass))
 
