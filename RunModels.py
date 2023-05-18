@@ -30,6 +30,7 @@ class RunModels:
             datasetLabels.add(instance[self.classIdx])
         datasetLabels = list(datasetLabels)
 
+        # self.getNNTable(datasetLabels)
         # self.getRandomForestTable(dataset, digitsAttributeTypes)
         # self.getKnnTable(datasetLabels)
 
@@ -45,6 +46,8 @@ class RunModels:
         titanicAttributeTypes = [True, True, True, False, False, False, False]
 
         datasetLabels = [0, 1]
+        
+        self.getNNTable(datasetLabels)
         # print("\n")
         # self.getRandomForestTable(dataset, titanicAttributeTypes)
         # print("\n")
@@ -80,6 +83,7 @@ class RunModels:
         # print("\n")
         # self.getKnnTable(datasetLabels)
 
+        self.getNNTable(datasetLabels)
         self.getNNGraph(datasetLabels)
         self.getKnnGraph(datasetLabels)
         self.getRandomForestGraph(dataset, loanAttributeTypes)
@@ -97,6 +101,8 @@ class RunModels:
         # self.getRandomForestTable(dataset, loanAttributeTypes)
         # print("\n")
         # self.getKnnTable(datasetLabels)
+        
+        self.getNNTable(datasetLabels)
 
         self.getKnnGraph(datasetLabels)
         self.getRandomForestGraph(dataset, loanAttributeTypes)
@@ -132,7 +138,6 @@ class RunModels:
                 normalizedTestData = self._normalize(testData, featureBounds)
 
                 NN_Accuracy, NN_F1_Score = self.evaluateNN(
-                    {},
                     normalizedTrainingData,
                     normalizedTestData,
                     datasetLabels,
@@ -243,7 +248,46 @@ class RunModels:
                     k, randomForestAccuracy, randomForestF1
                 )
             )
+            
+    def getNNTable(self, datasetLabels):
+        NN_hidden_layer_sizeses = [[16]]#[[8], [16], [8, 4], [4]]
+        NN_Accuracies = []
+        NN_F1_Scores = []
 
+        print("Dataset 4 metric evaluation using NN\n")
+        print("  Hidden_Layer1 | Hidden_Layer2  |  Accuracy  | F1 Score ")
+        print("---------------------------------------------------------")
+        
+        for hidden_layer_sizes in NN_hidden_layer_sizeses:
+            for testIdx in range(10):
+                trainingData = (
+                    self.kFoldPartitions[:testIdx] + self.kFoldPartitions[testIdx + 1 :]
+                )
+                trainingData = [instance for fold in trainingData for instance in fold]
+
+                testData = self.kFoldPartitions[testIdx]
+
+                featureBounds = self.getBounds(trainingData, testData)
+                normalizedTrainingData = self._normalize(trainingData, featureBounds)
+                normalizedTestData = self._normalize(testData, featureBounds)
+
+                NN_Accuracy, NN_F1_Score = self.evaluateNN(
+                    normalizedTrainingData,
+                    normalizedTestData,
+                    datasetLabels,
+                    self.classIdx,
+                    hidden_layer_sizes=hidden_layer_sizes,
+                )
+                NN_Accuracies.append(NN_Accuracy)
+                NN_F1_Scores.append(NN_F1_Score)
+
+            print(
+                "  {:.4f}  |   {:.4f}   |   {:.4f}   |  {:.4f}".format(
+                    hidden_layer_sizes[0], 0.0 if len(hidden_layer_sizes) == 1 else hidden_layer_sizes[1], NN_Accuracy, NN_F1_Score
+                )
+            )
+        
+        
     def getKnnTable(self, datasetLabels):
         KNN_hyperparameters = [3, 5, 7, 9, 11]
         KNN_Accuracies = []
@@ -288,13 +332,14 @@ class RunModels:
         return decisionTree.trainingAccuracy()
 
     def evaluateNN(
-        self, params: Dict, trainingData, testData, datasetLabels, classIdx, **kwargs
+        self, trainingData, testData, datasetLabels, classIdx, **kwargs
     ):
         NNModel = NeuralNetwork(
             training_data=trainingData,
             test_data=testData,
             class_index=classIdx,
             **kwargs
+            
         )
 
         return NNModel.evaluate(datasetLabels=datasetLabels, classIdx=classIdx)
@@ -354,4 +399,8 @@ class RunModels:
 
 
 digitsModel = RunModels()
+# digitsModel.runLoanModels()
+# digitsModel.runDigitsModels()
+# digitsModel.runTitanicModels()
 digitsModel.runLoanModels()
+# digitsModel.runParkinsonsModels()

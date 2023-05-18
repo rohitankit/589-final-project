@@ -75,6 +75,8 @@ class ModelEvaluation:
         return F1Total/len(labelPrecisions)
 
     def getHarmonicAverage(recall, precision):
+        if recall == 0 or precision == 0:
+            return 0
         return 2 / ((1/recall) + (1/precision))
         
         

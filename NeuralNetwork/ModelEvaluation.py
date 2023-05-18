@@ -51,7 +51,10 @@ class ModelEvaluation:
                         predictedClassIdx
                     ]
 
-            labelPrecisions.append(truePositives / (truePositives + falsePositives))
+            if truePositives + falsePositives > 0:
+                labelPrecisions.append(truePositives / (truePositives + falsePositives))
+            else:
+                labelPrecisions.append(0)
 
         return labelPrecisions
 

@@ -61,11 +61,12 @@ class StrVectorizer(ValueVectorizer[str]):
     def devectorize(self, data: np.ndarray) -> str:
         return self.values[data.argmax()]
 
-
-class FloatVectorizer(ValueVectorizer[float]):
-    def __init__(self, values: List[float], normalize: bool = True):
+class FloatVectorizer(ValueVectorizer[Union[float, np.float64]]):
+    def __init__(self, values: Union[List[float], List[np.float64]], normalize: bool = True):
+        if isinstance(values, np.ndarray):
+            values = [float(x) for x in values.tolist()]
         self.values = list(set(values))
-        self.categorical = len(self.values) < 5
+        self.categorical = len(self.values) < 11
         self.normalize = normalize
 
         if self.categorical:
@@ -79,7 +80,8 @@ class FloatVectorizer(ValueVectorizer[float]):
 
             self.vector_size = 1
 
-    def vectorizer_fn(self, arg: float) -> np.ndarray:
+    def vectorizer_fn(self, arg: Union[float, np.float64]) -> np.ndarray:
+        arg = float(arg)
         result = np.zeros(self.vector_size, dtype=np.float64)
 
         if self.categorical:
@@ -170,6 +172,7 @@ class BoolVectorizer(ValueVectorizer[bool]):
 data_vectorizer_types = {
     int: IntVectorizer,
     float: FloatVectorizer,
+    np.float64: FloatVectorizer,
     str: StrVectorizer,
     bool: BoolVectorizer,
 }

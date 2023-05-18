@@ -15,8 +15,8 @@ class NeuralNetwork:
         class_index: int = -1,
         hidden_layer_sizes: Optional[List[int]] = None,
         batch_size: int = 32,
-        epochs: int = 1000,
-        learning_rate: float = 1e-2,
+        epochs: int = 500,
+        learning_rate: float = 1.0,
         **kwargs
     ):
         if hidden_layer_sizes is None:
@@ -47,7 +47,7 @@ class NeuralNetwork:
             eval_y=self.vectorized_test_data.labels,
             learning_rate=learning_rate,
             console_log=False,
-            show_progress_bar=True,
+            show_progress_bar=False,
             **kwargs,
         )
         
