@@ -2,7 +2,7 @@ from typing import List, Tuple, Dict, Optional
 
 import numpy as np
 
-from fc_layer import FCLayer
+from .fc_layer import FCLayer
 
 from .ModelEvaluation import ModelEvaluation
 

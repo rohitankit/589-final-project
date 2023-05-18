@@ -58,11 +58,6 @@ class FCLayerTheta:
         self.weight -= learning_rate * weight_grad
         self.bias -= learning_rate * bias_grad
 
-
-# @dataclass
-# class FCLayerTheta
-
-
 class FCLayer:
     """A Fully Connected Layer object"""
 

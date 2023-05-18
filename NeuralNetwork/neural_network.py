@@ -1,8 +1,8 @@
 from typing import List, Optional
 
-from perceptron import Perceptron
+from .perceptron import Perceptron
 
-from data import DataVectorizer
+from .data import DataVectorizer
 
 from .ModelEvaluation import ModelEvaluation
 
@@ -22,8 +22,9 @@ class NeuralNetwork:
         if hidden_layer_sizes is None:
             hidden_layer_sizes = [16]
             
-        self.vectorizer = DataVectorizer(training_data + test_data, class_index)
-
+        self.class_index = class_index
+        self.vectorizer = DataVectorizer(training_data + test_data, self.class_index)
+        
         self.training_data = training_data
         self.test_data = test_data
         self.vectorized_training_data = self.vectorizer.vectorize_dataset(training_data)
@@ -45,14 +46,25 @@ class NeuralNetwork:
             eval_x=self.vectorized_test_data.attributes,
             eval_y=self.vectorized_test_data.labels,
             learning_rate=learning_rate,
+            console_log=False,
+            show_progress_bar=True,
             **kwargs,
         )
+        
+    def predict(self, row: List, class_idx: int):
+        
+        x_data, _ = self.vectorizer.vectorize_datapoint(row)
+        
+        y_pred = self.net.forward(x_data)
+        
+        return self.vectorizer.vectorizers[self.class_index].devectorize(y_pred)
+        
 
     def evaluate(self, datasetLabels, classIdx):
         modelEvaluator = ModelEvaluation()
         modelEvaluator.setLabels(datasetLabels)
 
-        for testInstance in self.testData:
+        for testInstance in self.test_data:
             predictedClass = self.predict(testInstance, classIdx)
             actualClass = testInstance[classIdx]
 

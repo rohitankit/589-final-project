@@ -21,6 +21,7 @@ class VectorDataset:
     attributes: np.ndarray
     labels: np.ndarray
 
+
 T = TypeVar("T")
 
 
@@ -33,6 +34,10 @@ class ValueVectorizer(ABC, Generic[T]):
 
     @abstractmethod
     def vectorizer_fn(self, data: T) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    def devectorize(self, data: np.ndarray) -> T:
         pass
 
     def __call__(self, arg: T) -> np.ndarray:
@@ -52,6 +57,9 @@ class StrVectorizer(ValueVectorizer[str]):
             result[self.values.index(arg)] = 1.0
 
         return result
+
+    def devectorize(self, data: np.ndarray) -> str:
+        return self.values[data.argmax()]
 
 
 class FloatVectorizer(ValueVectorizer[float]):
@@ -87,6 +95,15 @@ class FloatVectorizer(ValueVectorizer[float]):
                 result[0] = arg
 
             return result
+        
+    def devectorize(self, data: np.ndarray) -> float:
+        if self.categorical:
+            if self.values is None:
+                return 0.0
+            
+            return self.values[data.argmax()]
+        else:
+            return data[0]
 
 
 class IntVectorizer(ValueVectorizer[int]):
@@ -122,18 +139,32 @@ class IntVectorizer(ValueVectorizer[int]):
                 result[0] = arg
 
             return result
+        
+    def devectorize(self, data: np.ndarray) -> int:
+        if self.categorical:
+            if self.values is None:
+                return 0
+            
+            return self.values[data.argmax()]
+        
+        else:
+            return int(data[0])
+    
 
 
 class BoolVectorizer(ValueVectorizer[bool]):
     def __init__(self, values: List[str]):
         self.vector_size = 1
 
-    def __call__(self, arg: bool) -> np.ndarray:
+    def vectorize_fn(self, arg: bool) -> np.ndarray:
         result = np.zeros(self.vector_size, dtype=np.float64)
 
         result[0] = float(arg)
 
         return result
+    
+    def devectorize(self, data: np.ndarray) -> bool:
+        return data[0] == 1
 
 
 data_vectorizer_types = {
@@ -192,7 +223,6 @@ class DataVectorizer:
         y_result = np.zeros((num_examples, y_vector_length), dtype=np.float64)
 
         for example_idx, example in enumerate(data):
-            
             example_x_vector, example_y_vector = self.vectorize_datapoint(example)
 
             x_result[example_idx] = example_x_vector
