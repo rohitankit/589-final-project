@@ -21,7 +21,6 @@ class VectorDataset:
     attributes: np.ndarray
     labels: np.ndarray
 
-
 T = TypeVar("T")
 
 
@@ -154,24 +153,22 @@ def get_vectorizer(dtype: Type) -> Type[ValueVectorizer]:
     return vectorizer
 
 
-class DictDatasetVectorizer:
-    def __init__(self, data: DictDataset):
-        self.attribute_vectorizers: Dict[str, ValueVectorizer] = {}
+class DataVectorizer:
+    def __init__(self, data: List[List], label_index: int = -1):
+        self.label_index = label_index
+        self.vectorizers: List[ValueVectorizer] = []
 
-        for attribute_name, attribute_values in data.attributes.items():
-            attribute_dtype = type(list(attribute_values.values())[0])
+        num_columns = len(data[0])
+
+        for attribute_idx in range(num_columns):
+            attribute_values = [row[attribute_idx] for row in data]
+            attribute_dtype = type(attribute_values[0])
             data_vectorizer_type = get_vectorizer(attribute_dtype)
 
             vectorizer = data_vectorizer_type(attribute_values)
-            self.attribute_vectorizers[attribute_name] = vectorizer
+            self.vectorizers.append(vectorizer)
 
-        self.vectorizer_order = list(self.attribute_vectorizers.keys())
-        label_dtype = type(list(data.labels.values())[0])
-
-        label_vectorizer_type = get_vectorizer(label_dtype)
-        self.label_vectorizer = label_vectorizer_type(list(data.labels.values()))
-
-    def vectorize_dataset(self, data: DictDataset) -> VectorDataset:
+    def vectorize_dataset(self, data: List[List]) -> VectorDataset:
         """This function vectorizes an entire dataset using the vectorizers made during
         initialization
 
@@ -183,37 +180,35 @@ class DictDatasetVectorizer:
             labels
         """
 
-        x_vector_length = sum(
-            [
-                vectorizer.vector_size
-                for vectorizer in self.attribute_vectorizers.values()
-            ]
+        y_vector_length = self.vectorizers[self.label_index].vector_size
+        x_vector_length = (
+            sum(vectorizer.vector_size for vectorizer in self.vectorizers)
+            - y_vector_length
         )
-        y_vector_length = self.label_vectorizer.vector_size
 
-        example_keys = list(data.labels.keys())
-        num_examples = len(example_keys)
+        num_examples = len(data)
 
         x_result = np.zeros((num_examples, x_vector_length), dtype=np.float64)
         y_result = np.zeros((num_examples, y_vector_length), dtype=np.float64)
 
-        for example_index, example_key in enumerate(example_keys):
-            example_x_vector, example_y_vector = self.vectorize_datapoint(
-                dataset=data, key=example_key
-            )
+        for example_idx, example in enumerate(data):
+            
+            example_x_vector, example_y_vector = self.vectorize_datapoint(example)
 
-            x_result[example_index] = example_x_vector
-            y_result[example_index] = example_y_vector
+            x_result[example_idx] = example_x_vector
+            y_result[example_idx] = example_y_vector
 
         return VectorDataset(attributes=x_result, labels=y_result)
 
-    def vectorize_datapoint(self, dataset: DictDataset, key: int):
-        attrubute_vectors = [
-            attribute_vectorizer(dataset.attributes[attribute_name][key])
-            for attribute_name, attribute_vectorizer in self.attribute_vectorizers.items()
+    def vectorize_datapoint(self, example: List):
+        attribute_vectors = [
+            vectorizer(attribute)
+            for vectorizer, attribute in zip(self.vectorizers, example)
         ]
 
-        full_attribute_vector = np.concatenate(attrubute_vectors)
-        label_vector = self.label_vectorizer(dataset.labels[key])
+        label_vector = attribute_vectors[self.label_index]
+        del attribute_vectors[self.label_index]
+
+        full_attribute_vector = np.concatenate(attribute_vectors)
 
         return full_attribute_vector, label_vector

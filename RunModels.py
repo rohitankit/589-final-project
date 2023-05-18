@@ -65,6 +65,7 @@ class RunModels:
         # print("\n")
         # self.getKnnTable(datasetLabels)
 
+        # self.getNNGraph(datasetLabels)
         self.getKnnGraph(datasetLabels)
         self.getRandomForestGraph(dataset, loanAttributeTypes)
     
@@ -188,6 +189,9 @@ class RunModels:
         decisionTree = DecisionTree(trainingData, testData)
         decisionTree.train()
         return decisionTree.trainingAccuracy()
+    
+    # def evaluateNN(self, params: Dict, testData, datasetLabels, classIdx):
+        
     
     def evaluateKNN(self, k, trainingData, testData, datasetLabels, classIdx):
         KNNModel = KNN(k, trainingData, testData)

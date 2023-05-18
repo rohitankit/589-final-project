@@ -80,7 +80,7 @@ class FCLayer:
 
     @staticmethod
     def random(
-        in_dim: int, out_dim: int, act: Optional[Callable[[np.ndarray], np.ndarray]]
+        in_dim: int, out_dim: int, act: Optional[Callable[[np.ndarray], np.ndarray]] = None
     ) -> "FCLayer":
         """This function returns a randomly initialized FCLayer object
 

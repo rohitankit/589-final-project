@@ -45,21 +45,20 @@ def stratify(
         x_eval, y_eval = x_data[eval_indices], y_data[eval_indices]
 
         net = Perceptron(**hyperparams["net"])
-        train(
-            net,
+        net.train(
             train_x=x_train,
             train_y=y_train,
             eval_x=x_eval,
             eval_y=y_eval,
             **hyperparams["train"],
             console_log=False,
-            bar=True,
+            show_progress_bar=True,
             train_name=f"Fold {len(accuracies) + 1}/{k}",
         )
 
-        accuracy, f1 = validate(net, x_eval, y_eval, num_classes=num_classes)
+        accuracy, f1_score = validate(net, x_eval, y_eval, num_classes=num_classes)
         accuracies.append(accuracy)
-        f1_scores.append(f1)
+        f1_scores.append(f1_score)
 
     return float(np.mean(accuracies)), float(np.mean(f1_scores))
 

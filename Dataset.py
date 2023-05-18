@@ -11,6 +11,8 @@ class Dataset:
         self.datasetInstances = []
 
         self._datasetClassPartition = []
+
+    # [[LP001003,Male,Yes,1,Graduate,No,4583,1508,128,360,1,Rural,N], []]
     
     def load(self, dataInstances):
         """

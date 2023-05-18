@@ -4,6 +4,8 @@ import numpy as np
 
 from fc_layer import FCLayer
 
+from .ModelEvaluation import ModelEvaluation
+
 
 def cost_function(ground_truth: np.ndarray, network_out: np.ndarray) -> np.ndarray:
     """Calculates the cost of the network output compared to the ground truth
@@ -34,7 +36,7 @@ class Perceptron:
         """
 
         # fmt: off
-        self.layers = [FCLayer(sizes[i], sizes[i + 1])
+        self.layers = [FCLayer.random(sizes[i], sizes[i + 1])
                        for i in range(len(sizes) - 1)]
         # fmt: on
         self.lamda = lamda
@@ -102,7 +104,7 @@ class Perceptron:
             deltas.insert(0, next_delta)
 
             # Add regularization
-            weight_grad += self.lamda * layer.weight_theta
+            weight_grad += self.lamda * layer.theta.weight
 
             grads.insert(0, (weight_grad, bias_grad))
 
@@ -112,7 +114,7 @@ class Perceptron:
     def get_thetas(self) -> List[Tuple[np.ndarray, np.ndarray]]:
         """Gets the weights and biases of each layer in the perceptron"""
 
-        thetas = [(layer.weight_theta, layer.bias_theta) for layer in self.layers]
+        thetas = [(layer.theta.weight, layer.theta.bias) for layer in self.layers]
 
         return thetas
 

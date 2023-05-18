@@ -1,0 +1,4 @@
+DecisionTree
+KNN
+NeuralNetwork
+RandomForest
